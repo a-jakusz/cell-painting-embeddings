@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import tifffile
 from src.utils import download_plate_csv, save_site_image
 
-# selected compounds
+# selected compounds, searched in JCP storage in website
 COMPOUNDS = {
     "aspirin": "JCP2022_008461", "ibuprofen": "JCP2022_029646",
     "butylparaben": "JCP2022_073093", "ampicillin": "JCP2022_004119",
@@ -21,7 +21,7 @@ COMPOUNDS = {
 }
 
 # get metadata of aspirin, check data
-aspirin = get_item_location_metadata("JCP2022_008461", input_column="JCP2022")
+aspirin = get_item_location_metadata("JCP2022_073093", input_column="JCP2022")
 
 print(aspirin.shape)
 print(aspirin.head())
@@ -66,7 +66,7 @@ p = save_site_image(
 )
 
 img = tifffile.imread(p)   # (5, 1080, 1080)
-plt.imshow(img[1])   # 0 = DNA, 1 = ER, 2 = Mito, 3 = AGP, 4 = RNA
+plt.imshow(img[3])   # 0 = DNA, 1 = ER, 2 = Mito, 3 = AGP, 4 = RNA
 plt.show()
 
 # check, whether each of my compounds is available in source 7 -- yes
