@@ -1,3 +1,4 @@
+# test run of cloome
 import os
 from third_party.cloome.src.cloome.model import CLOOME
 from huggingface_hub import hf_hub_download
@@ -15,3 +16,13 @@ images = [os.path.join(CLOOME_DIR, "example", "images", f"{channel}.tif") for ch
 encoder = CLOOME(ckpt, config)
 img_embeddings = encoder.encode_images(images)
 print(img_embeddings)
+
+# retrieve obtained embeddings
+import polars as pl
+
+df = pl.read_parquet("data/embeddings/embs.parquet")
+print(df.shape)
+emb = df.item(0, 2)
+print(emb)
+print(emb.shape) # (512,)
+print(df.head(20))
