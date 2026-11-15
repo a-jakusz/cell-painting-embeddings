@@ -66,7 +66,7 @@ p = save_site_image(
 )
 
 img = tifffile.imread(p)   # (5, 1080, 1080)
-plt.imshow(img[3])   # 0 = DNA, 1 = ER, 2 = Mito, 3 = AGP, 4 = RNA
+plt.imshow(img[1])   # 0 = DNA, 1 = ER, 2 = Mito, 3 = AGP, 4 = RNA
 plt.show()
 
 # check, whether each of my compounds is available in source 7 -- yes

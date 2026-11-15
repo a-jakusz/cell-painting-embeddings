@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
-
+from scipy.stats import gaussian_kde
 
 
 reducer = umap.UMAP(metric='cosine', random_state=1)
@@ -27,13 +27,33 @@ for i, c in enumerate(np.unique(compounds)):
 
 is_dmso = compounds == "dmso"
 fig = px.scatter(x=emb_umap[~is_dmso, 0], y=emb_umap[~is_dmso, 1], color=compounds[~is_dmso], color_discrete_sequence=px.colors.qualitative.Alphabet)
-fig.add_trace(go.Histogram2dContour(
-    x=emb_umap[is_dmso, 0], y=emb_umap[is_dmso, 1],
+
+# kde
+x, y = emb_umap[is_dmso, 0], emb_umap[is_dmso, 1]
+kde = gaussian_kde(np.vstack([x, y]))
+
+n = 3
+xi = np.linspace(x.min()-n, x.max()+n, 200)
+yi = np.linspace(y.min()-n, y.max()+n, 200)
+X, Y = np.meshgrid(xi, yi)
+Z = kde(np.vstack([X.ravel(), Y.ravel()])).reshape(X.shape)
+
+fig.add_trace(go.Contour(
+    x=xi, y=yi, z=Z,
     colorscale="Blues", ncontours=40,
     contours=dict(coloring="heatmap"),
-    opacity=0.5, showscale=False, showlegend=False, 
+    opacity=0.5, showscale=False, 
     name="dmso", hoverinfo='skip',
-))
+    )
+)
+
+# fig.add_trace(go.Histogram2dContour(
+#     x=emb_umap[is_dmso, 0], y=emb_umap[is_dmso, 1],
+#     colorscale="Blues", ncontours=40,
+#     contours=dict(coloring="heatmap"),
+#     opacity=0.5, showscale=False, 
+#     name="dmso", hoverinfo='skip',
+# ))
 
 plt.title('test')
 plt.show()
