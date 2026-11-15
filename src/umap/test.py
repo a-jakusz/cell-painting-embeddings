@@ -2,21 +2,39 @@ import umap
 import polars as pl
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
 
-reducer = umap.UMAP()
+
+
+reducer = umap.UMAP(metric='cosine', random_state=1)
+# reducer = umap.UMAP(metric='euclidean', random_state=1)
 
 df = pl.read_parquet("data/embeddings/embs.parquet")
 emb = np.array(df["embedding"].to_list())
+print(df)
 print(emb)
 
 emb_umap = reducer.fit_transform(emb)
+print(emb_umap)
 
 compounds = df["compound"].to_numpy()
-print(compounds)
+print(np.unique(compounds))
 cmap = plt.get_cmap("tab20")                      # 20 distinct colours
 for i, c in enumerate(np.unique(compounds)):
     m = compounds == c
     plt.scatter(emb_umap[m, 0], emb_umap[m, 1], s=15, color=cmap(i % 20), label=c)
 
+is_dmso = compounds == "dmso"
+fig = px.scatter(x=emb_umap[~is_dmso, 0], y=emb_umap[~is_dmso, 1], color=compounds[~is_dmso], color_discrete_sequence=px.colors.qualitative.Alphabet)
+fig.add_trace(go.Histogram2dContour(
+    x=emb_umap[is_dmso, 0], y=emb_umap[is_dmso, 1],
+    colorscale="Blues", ncontours=40,
+    contours=dict(coloring="heatmap"),
+    opacity=0.5, showscale=False, showlegend=False, 
+    name="dmso", hoverinfo='skip',
+))
+
 plt.title('test')
 plt.show()
+fig.show()
