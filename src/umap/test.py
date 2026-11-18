@@ -18,15 +18,19 @@ print(emb)
 emb_umap = reducer.fit_transform(emb)
 print(emb_umap)
 
-compounds = df["compound"].to_numpy()
+compounds = df['compound'].to_numpy()
+plates = df['plate'].to_numpy()
+wells = df['well'].to_numpy()
+sites = df['site'].to_numpy()
 print(np.unique(compounds))
-cmap = plt.get_cmap("tab20")                      # 20 distinct colours
+cmap = plt.get_cmap("tab20") # 20 distinct colours
 for i, c in enumerate(np.unique(compounds)):
     m = compounds == c
     plt.scatter(emb_umap[m, 0], emb_umap[m, 1], s=15, color=cmap(i % 20), label=c)
 
-is_dmso = compounds == "dmso"
+is_dmso = compounds == 'dmso'
 fig = px.scatter(x=emb_umap[~is_dmso, 0], y=emb_umap[~is_dmso, 1], color=compounds[~is_dmso], color_discrete_sequence=px.colors.qualitative.Alphabet)
+# fig = px.scatter(x=emb_umap[~is_dmso, 0], y=emb_umap[~is_dmso, 1], color=plates[~is_dmso], color_discrete_sequence=px.colors.qualitative.Alphabet)
 
 # kde
 x, y = emb_umap[is_dmso, 0], emb_umap[is_dmso, 1]
@@ -46,14 +50,6 @@ fig.add_trace(go.Contour(
     name="dmso", hoverinfo='skip',
     )
 )
-
-# fig.add_trace(go.Histogram2dContour(
-#     x=emb_umap[is_dmso, 0], y=emb_umap[is_dmso, 1],
-#     colorscale="Blues", ncontours=40,
-#     contours=dict(coloring="heatmap"),
-#     opacity=0.5, showscale=False, 
-#     name="dmso", hoverinfo='skip',
-# ))
 
 plt.title('test')
 plt.show()

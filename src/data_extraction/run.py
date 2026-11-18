@@ -1,5 +1,6 @@
 import matplotlib.colors as mpl  # noqa: CPY001
 import numpy as np
+import polars as pl
 from jump_portrait.fetch import get_item_location_metadata, get_jump_image
 from matplotlib import pyplot as plt
 from src.utils import download_plate_csv, save_site_image
@@ -18,7 +19,7 @@ COMPOUNDS = {
 }
 
 SOURCE, BATCH = "source_7", "20210723_Run2" # obtained experimentally
-N_WELLS, SITES, N_DMSO = 3, [1, 2, 3], 40
+N_WELLS, SITES, N_DMSO_PER_PLATE = 3, [1, 2, 3], 6
 
 def pick(df):
     df = df.filter((df["Metadata_Source"] == SOURCE) & (df["Metadata_Batch"] == BATCH))
@@ -36,7 +37,11 @@ for name, jcp in COMPOUNDS.items():
 
 # extract DMSO (negative probe) from same plates
 dmso = pick(get_item_location_metadata("IAZDPXIOMUYVGZ-UHFFFAOYSA-N")) # InChiKey DMSO
-dmso = dmso.filter(dmso["Metadata_Plate"].is_in(list(plates))).sample(N_DMSO, seed=0)
+# same number of DMSO wells on every plate, so plate-wise normalisation is equally reliable
+dmso = pl.concat([
+    dmso.filter(dmso["Metadata_Plate"] == plate).sample(N_DMSO_PER_PLATE, seed=0)
+    for plate in sorted(plates)
+])
 for plate, well in dmso.rows():
     for site in SITES:
         save_site_image(SOURCE, BATCH, plate, well, site, group="dmso")
